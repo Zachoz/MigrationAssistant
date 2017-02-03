@@ -1,0 +1,7 @@
+RewriteEngine On 
+
+RewriteRule .* - [E=noabort:1]
+RewriteRule .* - [E=noconntimeout:1]
+
+RewriteCond %{SERVER_PORT} 80 
+RewriteRule ^(.*)$ https://migration.zachoz.com/$1 [R,L]

@@ -1,0 +1,7 @@
+.DS_STORE
+
+*.iml
+.idea
+
+test-debug/
+error_log
