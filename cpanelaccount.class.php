@@ -4,8 +4,6 @@ class CpanelAccount {
 
     public $host, $username, $password;
 
-    private $primaryDomain, $diskUsed, $diskTotal;
-
     function __construct($host, $username, $password) {
         $this->host = $host;
         $this->username = $username;
