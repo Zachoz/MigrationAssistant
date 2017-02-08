@@ -40,19 +40,19 @@
                 <form action="cpanelsummary.php" method="post">
                     <div class="form-group">
                         <input type="text" placeholder="Server Host name or IP address" class="form-control" id="host"
-                               name="host" required>
+                               name="host" required autocomplete="off">
                     </div>
                     <div class="form-group">
                         <input type="text" placeholder="cPanel Username" class="form-control" id="username"
-                               name="username" required>
+                               name="username" required autocomplete="off">
                     </div>
                     <div class="form-group">
                         <input type="text" placeholder="cPanel Password" class="form-control" id="password"
-                               name="password" required>
+                               name="password" required autocomplete="off">
                     </div>
                     <div class="form-group">
                         <input type="text" placeholder="Primary domain" class="form-control" id="domain" name="domain"
-                               required>
+                               required autocomplete="off">
                     </div>
                     <button type="submit" class="btn btn-default" onclick="setSingleStatus();">Check Account</button>
                 </form>
@@ -68,13 +68,13 @@
                 <form action="cpanelsummary.php" method="post">
                     <div class="form-group">
                         <input type="text" placeholder="Server Host name or IP address" class="form-control" id="host"
-                               name="host" required>
+                               name="host" required autocomplete="off">
                     </div>
                     <div class="form-horizontal">
                         <div class="form-group">
                             <div class="col-md-12">
                                 <textarea class="form-control" id="accounts" rows="6" name="accounts"
-                                          placeholder="username / password / domain" required></textarea>
+                                          placeholder="username / password / domain" required autocomplete="off"></textarea>
                             </div>
                         </div>
                     </div>
