@@ -93,8 +93,8 @@ if (!fsockopen($host, 2083, $errno, $errstr, 10)) { // if connection to cPanel s
 
                     $primaryDomainMatch = $response['primary_domain_matches'];
                     $enoughFreeDiskSpace = floatval($response['diskusedpercentage']) <= 60.0 ? true : false;
-                    $diskUsed = round((intval($response['diskquotaused']) / 1024 / 1024), 2);
-                    $diskQuota = (intval($response['diskquota']) / 1024 / 1024);
+                    $diskUsed = round((intval($response['diskquotaused'])), 2);
+                    $diskQuota = (intval($response['diskquota']));
                     $possibleApiError = ($diskUsed == 0 && $diskQuota == 0); // if both of these are 0, likely an API error
                     $warning = (!$primaryDomainMatch || !$enoughFreeDiskSpace || $possibleApiError);
 
@@ -108,7 +108,7 @@ if (!fsockopen($host, 2083, $errno, $errstr, 10)) { // if connection to cPanel s
                     echo "<p>Primary domain: " . ($response['primary_domain']) . "</p>";
 
                     if (!$primaryDomainMatch && in_array($account['domain'], $response['addondomains']))
-                        echo "<p>Domain exists as addon domain: <b>Yes</b></p>";
+                        echo "<p>Domain (" . $account['domain'] . ") exists as addon domain: <b>Yes</b></p>";
 
                     echo("<p>Disk Usage: " . $diskUsed . "MB / " . $diskQuota . "MB (Disk used: " .
                         floatval($response['diskusedpercentage']) . "%)</p>");

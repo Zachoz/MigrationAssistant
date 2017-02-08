@@ -3,6 +3,7 @@
 class CpanelAccount {
 
     public $host, $username, $password;
+    private $loginSuccessful;
 
     function __construct($host, $username, $password) {
         $this->host = $host;
@@ -19,33 +20,46 @@ class CpanelAccount {
             $loginSuccessful = false;
         }
 
+        $this->loginSuccessful = $loginSuccessful;
+
         return $loginSuccessful;
     }
 
     public function getPrimaryDomain() {
-        $response = json_decode($this->execApiCall("DomainLookup", "getmaindomain"), true);
-        return $response['cpanelresult']['data'][0]['main_domain']; // data returns another array
+        $response = json_decode($this->execApiCall("DomainInfo", "domains_data"), true);
+        return $response['data']['main_domain']['domain'];
     }
 
     public function getAddonDomains() {
-        $response = json_decode($this->execApiCall("DomainLookup", "getbasedomains"), true);
-        $domainsList = $response['cpanelresult']['data'][0]['domain']; // data returns another array
-        $domains = explode(",", $domainsList);
+        $response = json_decode($this->execApiCall("DomainInfo", "domains_data"), true);
+        $domainsList = $response['data']['addon_domains']; // data returns another array
+        $domains = array();
+        
+        foreach ($domainsList as $domain) {
+            $domains[] = $domain['domain'];
+        }
+
         return $domains;
     }
 
     public function getDiskUsage() {
-        $response = json_decode($this->execApiCall("DiskUsage", "fetchdiskusagewithextras"), true);
+        $response = json_decode($this->execApiCall("Quota", "get_quota_info"), true);
         return array(
-            'quotaused' => $response['cpanelresult']['data'][0]['quotaused'],
-            'quotalimit' => $response['cpanelresult']['data'][0]['quotalimit'],
-            'mailman' => $response['cpanelresult']['data'][0]['mailman']
+            'quotaused' => $response['data']['megabytes_used'],
+            'quotalimit' => $response['data']['megabyte_limit']
         );
     }
 
-    private function execApiCall($module, $function) {
-        $query = "https://" . $this->host . ":2083/json-api/cpanel?cpanel_jsonapi_user=" . $this->username .
-            "&cpanel_jsonapi_apiversion=2&cpanel_jsonapi_module=" . $module . "&cpanel_jsonapi_func=" . $function;
+    public function execApiCall($module, $function, $parametres = "") {
+        $query = "https://" . $this->host . ":2083/execute/" . $module . "/" . $function . "?" . $parametres;
+
+        // Need to use API2 to more easily test login credentials.
+        // If login fails, API2 actually outputs a json response saying the login failed
+        // If a login fails with UAPI, it sends back the HTML for the fucking login page.
+        if (!isset($this->loginSuccessful)) {
+            $query = "https://" . $this->host . ":2083/json-api/cpanel?cpanel_jsonapi_user=" . $this->username .
+                "&cpanel_jsonapi_apiversion=2&cpanel_jsonapi_module=" . $module . "&cpanel_jsonapi_func=" . $function;
+        }
 
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0);       // Allow self-signed certs (since it's probs gonna go dodgy)
@@ -58,7 +72,6 @@ class CpanelAccount {
         $result = curl_exec($curl);
         if ($result == false) {
             error_log("curl_exec threw error \"" . curl_error($curl) . "\" for $query");
-            // log error if curl exec fails
         }
         curl_close($curl);
 
