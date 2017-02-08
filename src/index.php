@@ -1,9 +1,3 @@
-<?php
-
-require('utils.php');
-
-?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -26,7 +20,7 @@ require('utils.php');
 </head>
 <body>
 
-<? include('includes/header.php'); ?>
+<? include(__DIR__ . '/includes/header.php'); ?>
 <script>document.getElementById('home').className = 'active';</script>
 <br><br><br>
 

@@ -1,9 +1,3 @@
-<?php
-
-require('utils.php');
-
-?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,7 +5,7 @@ require('utils.php');
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-    <title>Migration Assistant</title>
+    <title>Email checker</title>
 
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
@@ -33,32 +27,28 @@ require('utils.php');
 <body>
 
 <? include('includes/header.php'); ?>
-<script>document.getElementById('cpanelcheck').className = 'active';</script>
+<script>document.getElementById('emailcheck').className = 'active';</script>
 <br><br><br>
 
 <div class="container">
-    <h2>Check cPanel accounts</h2>
+    <h2>Check email accounts</h2>
 
     <div class="col-md-6" class="pull-left">
         <div class="row">
             <div class="col-md-11" class="pull-left">
                 <h3>Check a single account</h3>
-                <form action="cpanelsummary.php" method="post">
+                <form action="emailsummary.php" method="post">
                     <div class="form-group">
-                        <input type="text" placeholder="Server Host name or IP address" class="form-control" id="host"
-                               name="host" required>
+                        <input type="text" placeholder="Mail server Host name or IP address" class="form-control"
+                               id="host" name="host" required>
                     </div>
                     <div class="form-group">
-                        <input type="text" placeholder="cPanel Username" class="form-control" id="username"
-                               name="username" required>
-                    </div>
-                    <div class="form-group">
-                        <input type="text" placeholder="cPanel Password" class="form-control" id="password"
-                               name="password" required>
-                    </div>
-                    <div class="form-group">
-                        <input type="text" placeholder="Primary domain" class="form-control" id="domain" name="domain"
+                        <input type="text" placeholder="Email address" class="form-control" id="email" name="email"
                                required>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" placeholder="Email password" class="form-control" id="password"
+                               name="password" required>
                     </div>
                     <button type="submit" class="btn btn-default" onclick="setSingleStatus();">Check Account</button>
                 </form>
@@ -71,7 +61,7 @@ require('utils.php');
         <div class="row">
             <div class="col-md-11" class="pull-left">
                 <h3>Check multiple accounts account</h3>
-                <form action="cpanelsummary.php" method="post">
+                <form action="emailsummary.php" method="post">
                     <div class="form-group">
                         <input type="text" placeholder="Server Host name or IP address" class="form-control" id="host"
                                name="host" required>
@@ -79,8 +69,8 @@ require('utils.php');
                     <div class="form-horizontal">
                         <div class="form-group">
                             <div class="col-md-12">
-                                <textarea class="form-control" id="accounts" rows="6" name="accounts"
-                                          placeholder="username / password / domain" required></textarea>
+                                <textarea class="form-control" id="accounts" rows="4" name="accounts"
+                                          placeholder="email address / password" required></textarea>
                             </div>
                         </div>
                     </div>
@@ -96,7 +86,6 @@ require('utils.php');
 
 <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-<!-- Include all compiled plugins (below), or include individual files as needed -->
 <!-- Latest compiled and minified JavaScript -->
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
         integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
