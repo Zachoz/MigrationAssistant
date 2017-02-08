@@ -40,15 +40,15 @@
                 <form action="emailsummary.php" method="post">
                     <div class="form-group">
                         <input type="text" placeholder="Mail server Host name or IP address" class="form-control"
-                               id="host" name="host" required>
+                               id="host" name="host" required autocomplete="off">
                     </div>
                     <div class="form-group">
                         <input type="text" placeholder="Email address" class="form-control" id="email" name="email"
-                               required>
+                               required autocomplete="off">
                     </div>
                     <div class="form-group">
                         <input type="text" placeholder="Email password" class="form-control" id="password"
-                               name="password" required>
+                               name="password" required autocomplete="off">
                     </div>
                     <button type="submit" class="btn btn-default" onclick="setSingleStatus();">Check Account</button>
                 </form>
@@ -64,13 +64,13 @@
                 <form action="emailsummary.php" method="post">
                     <div class="form-group">
                         <input type="text" placeholder="Server Host name or IP address" class="form-control" id="host"
-                               name="host" required>
+                               name="host" required autocomplete="off">
                     </div>
                     <div class="form-horizontal">
                         <div class="form-group">
                             <div class="col-md-12">
                                 <textarea class="form-control" id="accounts" rows="4" name="accounts"
-                                          placeholder="email address / password" required></textarea>
+                                          placeholder="email address / password" required autocomplete="off"></textarea>
                             </div>
                         </div>
                     </div>
