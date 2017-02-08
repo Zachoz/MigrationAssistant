@@ -1,13 +1,7 @@
 <?php
-// Print as each account as done rather than load page all at once
-@ini_set('zlib.output_compression', 0);
-@ini_set('implicit_flush', 1);
-@ob_end_clean();
-set_time_limit(0);
-header('Content-type: text/html; charset=utf-8');
-ob_start();
-
 require(__DIR__ . '/classes/utils.php');
+
+Utils::enableOutputBuffer();
 
 $accounts = array();
 
@@ -25,11 +19,6 @@ if (!isset($_POST['accounts'])) { // if 'accounts' exists, they're testing multi
         error_log("str" . $accountStr);
         $accounts[] = Utils::passEmailAccountCredentials($accountStr);
     }
-}
-
-function all_the_flushes() { // both of these are needed...but ob_flush() still creates errors lol
-    @ob_flush();
-    @flush();
 }
 
 ?>
@@ -92,7 +81,7 @@ if (!fsockopen($host, 993, $errno, $errstr, 10)) { // if connection to email ser
                 // This is fucking disgusting but it works so fuck it
                 echo "<script>document.getElementById('currentacc').innerHTML = 
                         document.getElementById('currentacc').innerHTML.replace('" . ($testingAccountNumber - 1) . "', '" . ($testingAccountNumber) . "');</script>";
-                all_the_flushes(); // make sure this actually gets printed
+                Utils::flushBuffer(); // make sure this actually gets printed
 
                 $mailbox = imap_open("{" . $host . ":993/ssl/novalidate-cert}INBOX", $account['email'], $account['password']);
 
@@ -127,7 +116,7 @@ if (!fsockopen($host, 993, $errno, $errstr, 10)) { // if connection to email ser
                     echo "</div>";
                 }
 
-                all_the_flushes();
+                Utils::flushBuffer();
             }
 
             ?>

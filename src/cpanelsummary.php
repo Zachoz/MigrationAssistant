@@ -1,13 +1,7 @@
 <?php
-// Print as each account as done rather than load page all at once
-@ini_set('zlib.output_compression', 0);
-@ini_set('implicit_flush', 1);
-@ob_end_clean();
-set_time_limit(0);
-header('Content-type: text/html; charset=utf-8');
-ob_start();
-
 require(__DIR__ . '/classes/utils.php');
+
+Utils::enableOutputBuffer();
 
 $accounts = array();
 
@@ -25,11 +19,6 @@ if (!isset($_POST['accounts'])) { // if 'accounts' exists, they're testing multi
     foreach ($splitAccounts as $accountStr) {
         $accounts[] = Utils::passAccountCredentials($accountStr);
     }
-}
-
-function all_the_flushes() { // both of these are needed...but ob_flush() still creates errors lol
-    @ob_flush();
-    @flush();
 }
 
 ?>
@@ -57,9 +46,7 @@ function all_the_flushes() { // both of these are needed...but ob_flush() still 
 </head>
 <body>
 
-<?
-include('includes/header.php');
-?>
+<? include('includes/header.php'); ?>
 <script>document.getElementById('cpanelcheck').className = 'active';</script>
 <br><br><br>
 
@@ -85,7 +72,7 @@ if (!fsockopen($host, 2083, $errno, $errstr, 10)) { // if connection to cPanel s
     <br>
 
     <?php
-    all_the_flushes(); // Load the header and shit
+    Utils::flushBuffer(); // Load the header and shit
     ?>
 
     <div class="col-md-6" class="pull-left">
@@ -98,7 +85,7 @@ if (!fsockopen($host, 2083, $errno, $errstr, 10)) { // if connection to cPanel s
                 // This is fucking disgusting but it works so fuck it
                 echo "<script>document.getElementById('currentacc').innerHTML = 
                         document.getElementById('currentacc').innerHTML.replace('" . ($testingAccountNumber - 1) . "', '" . ($testingAccountNumber) . "');</script>";
-                all_the_flushes(); // make sure this actually gets printed
+                Utils::flushBuffer(); // make sure this actually gets printed
 
                 $response = Utils::getApiResponse($host, $account['domain'], $account['username'], $account['password']);
 
@@ -150,7 +137,7 @@ if (!fsockopen($host, 2083, $errno, $errstr, 10)) { // if connection to cPanel s
 
                 }
 
-                all_the_flushes();
+                Utils::flushBuffer();
             }
 
             ?>

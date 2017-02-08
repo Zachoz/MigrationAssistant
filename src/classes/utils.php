@@ -57,4 +57,19 @@ class Utils {
         );
     }
 
+    public static function enableOutputBuffer() {
+        // Print as each account as done rather than load page all at once
+        @ini_set('zlib.output_compression', 0);
+        @ini_set('implicit_flush', 1);
+        @ob_end_clean();
+        set_time_limit(0);
+        header('Content-type: text/html; charset=utf-8');
+        ob_start();
+    }
+
+    public static function flushBuffer() { // both of these are needed
+        @ob_flush();
+        @flush();
+    }
+
 }
