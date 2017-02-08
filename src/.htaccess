@@ -1,0 +1,14 @@
+# IP white listing
+#order deny,allow
+#deny from all
+#allow from ip.address.here
+
+RewriteEngine On
+
+# Fix litespeed killing the script for running too long
+RewriteRule .* - [E=noabort:1]
+RewriteRule .* - [E=noconntimeout:1]
+
+# Force HTTPS
+RewriteCond %{SERVER_PORT} 80 
+RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI} [R,L]

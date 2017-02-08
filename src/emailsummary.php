@@ -7,7 +7,7 @@ set_time_limit(0);
 header('Content-type: text/html; charset=utf-8');
 ob_start();
 
-require('utils.php');
+require(__DIR__ . '/classes/utils.php');
 
 $accounts = array();
 
@@ -15,15 +15,15 @@ $host = $_POST['host']; // set host
 
 if (!isset($_POST['accounts'])) { // if 'accounts' exists, they're testing multiple accounts
     $accounts[] = array( // testing single account
-        'username' => $_POST['username'],
-        'password' => $_POST['password'],
-        'domain' => $_POST['domain']
+        'email' => $_POST['email'],
+        'password' => $_POST['password']
     );
 } else { // Testing multiple accounts
     $splitAccounts = preg_split("/\\r\\n|\\r|\\n/", $_POST['accounts']);
 
     foreach ($splitAccounts as $accountStr) {
-        $accounts[] = Utils::passAccountCredentials($accountStr);
+        error_log("str" . $accountStr);
+        $accounts[] = Utils::passEmailAccountCredentials($accountStr);
     }
 }
 
@@ -41,7 +41,6 @@ function all_the_flushes() {
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
     <title>Migration Assistant</title>
 
@@ -58,10 +57,8 @@ function all_the_flushes() {
 </head>
 <body>
 
-<?
-include('includes/header.php');
-?>
-<script>document.getElementById('cpanelcheck').className = 'active';</script>
+<? include(__DIR__ . '/includes/header.php'); ?>
+<script>document.getElementById('emailcheck').className = 'active';</script>
 <br><br><br>
 
 <?
@@ -72,8 +69,8 @@ if ($host == null || $host == "") {
 }
 
 // Check that cPanel server is accessible
-if (!fsockopen($host, 2083, $errno, $errstr, 10)) { // if connection to cPanel server fails
-    echo "<div class='container'><h2>Connection to cPanel on " . $host . ":2083 failed!</h2>";
+if (!fsockopen($host, 993, $errno, $errstr, 10)) { // if connection to email server fails
+    echo "<div class='container'><h2>Connection to mail server on " . $host . ":993 failed!</h2>";
     echo "Error: " . $errstr;
     echo "</div>";
     die();
@@ -81,77 +78,56 @@ if (!fsockopen($host, 2083, $errno, $errstr, 10)) { // if connection to cPanel s
 ?>
 
 <div class="container">
-    <h2>Checking accounts on: <? echo $host; ?></h2>
+    <h2>Checking email accounts on: <? echo $host; ?></h2>
     <h3 id="currentacc">Testing account: 0 / <? echo count($accounts); ?></h3>
     <br>
-
-    <?php
-    // Load the header and shit
-    all_the_flushes();
-    ?>
 
     <div class="col-md-6" class="pull-left">
         <div class="row">
             <?php
             $testingAccountNumber = 0;
-            
+
             foreach ($accounts as $account) {
-                 $testingAccountNumber++;
+                $testingAccountNumber++;
+
                 // This is fucking disgusting but it works so fuck it
                 echo "<script>document.getElementById('currentacc').innerHTML = 
                         document.getElementById('currentacc').innerHTML.replace('" . ($testingAccountNumber - 1) . "', '" . ($testingAccountNumber) . "');</script>";
                 all_the_flushes(); // make sure this actually gets printed
-                
-                $response = Utils::getApiResponse($host, $account['domain'], $account['username'], $account['password']);
 
-                if ($response['login'] == "true") {
+                $mailbox = imap_open("{" . $host . ":993/ssl/novalidate-cert}INBOX", $account['email'], $account['password']);
 
-                    $primaryDomainMatch = $response['primary_domain_matches'];
-                    $enoughFreeDiskSpace = floatval($response['diskusedpercentage']) <= 60.0 ? true : false;
-                    $diskUsed = round((intval($response['diskquotaused']) / 1024 / 1024), 2);
-                    $diskQuota = (intval($response['diskquota']) / 1024 / 1024);
-                    $possibleApiError = ($diskUsed == 0 && $diskQuota == 0); // if both of these are 0, likely an API error
-                    $warning = (!$primaryDomainMatch || !$enoughFreeDiskSpace || $possibleApiError);
+                if ($mailbox) { // login successful
+                    $quota = imap_get_quotaroot($mailbox, "INBOX");
 
-                    echo "<div class='panel panel-" . (!$warning ? "success" : "warning") . "'>";
+                    echo "<div class='panel panel-success'>";
 
-                    echo "<div class='panel-heading'><b>" . $account['username'] . " / " . $account['domain'] . "</b></div>";
+                    echo "<div class='panel-heading'><b>" . $account['email'] . "</b></div>";
                     echo "<div class='panel-body'>";
                     // Body of panel
                     echo "<p>Login: <b>Success</b></p>";
-                    echo "<p>Primary domains match: <b>" . ($response['primary_domain_matches'] ? "Yes" : "No") . "</b></p>";
-                    echo "<p>Primary domain: " . ($response['primary_domain']) . "</p>";
-
-                    if (!$primaryDomainMatch && in_array($account['domain'], $response['addondomains']))
-                        echo "<p>Domain exists as addon domain: <b>Yes</b></p>";
-
-                    echo("<p>Disk Usage: " . $diskUsed . "MB / " . $diskQuota . "MB (Disk used: " .
-                        floatval($response['diskusedpercentage']) . "%)</p>");
+                    echo "<p>Quota used: " . round(($quota['STORAGE']['usage'] / 1024), 2) . "MB</p>";
+                    echo "<p>Total quota: " . ($quota['STORAGE']['limit'] / 1024) . "MB</p>";
+                    echo "<p>Number of emails in INBOX: " . imap_num_msg($mailbox) . "</p>";
                     echo "</div>";
                     echo "<div class='panel-footer'>"; // open panel-footer
-                    if (!$warning) {
-                        echo "<p>Ready to migrate</p>";
-                    } else {
-                        if (!$primaryDomainMatch) echo "<p>Primary domains do not match!</p>";
-                        if (!$enoughFreeDiskSpace) echo "<p>Not enough free disk space! Less than 40% available!</p>";
-                        if ($possibleApiError) echo "<p>Query returned 0MB disk usage! This can indicate that the host is 
-                            inteferring with cPanel's API, which will cause the copy tool to fail!</p>";
-                    }
+                    echo "<p>Ready to migrate!</p>";
                     echo "</div>"; // close panel-footer
                     echo "</div>";
 
+                    imap_close($mailbox);
                 } else {
                     echo "<div class='panel panel-danger'>";
-                    echo "<div class='panel-heading'><b>" . $account['username'] . " / " . $account['domain'] . "</b></div>";
+                    echo "<div class='panel-heading'><b>" . $account['email'] . "</b></div>";
                     echo "<div class='panel-body'>";
                     // Body of panel
                     echo "<p>Login: <b>Failed</b></p>";
+                    echo "<p>Error: " . imap_last_error() . "</p>";
                     echo "</div>";
                     echo "<div class='panel-footer'>Please request correct login details</div>";
                     echo "</div>";
-
                 }
-                
+
                 all_the_flushes();
             }
 

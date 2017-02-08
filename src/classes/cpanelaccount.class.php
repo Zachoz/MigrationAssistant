@@ -11,17 +11,14 @@ class CpanelAccount {
     }
 
     public function login() {
-        $response = $this->execApiCall("DomainLookup", "getmaindomain");
+        $response = $this->execApiCall("DomainLookup", "getmaindomain"); // just run any API call
         $responseArray = json_decode($response, true);
-        $loginSuccessful = false;
+        $loginSuccessful = true;
 
         if (isset($responseArray['cpanelresult']['error']) && ($responseArray['cpanelresult']['error'] == "Access denied")) {
             $loginSuccessful = false;
-        } else {
-            $loginSuccessful = true;
         }
-        //return ((isset($responseArray['error']) && $responseArray['error'] == "Access denied"));
-        //["data"]["reason"] == "Access Denied";
+
         return $loginSuccessful;
     }
 
