@@ -1,4 +1,12 @@
 <?php
+// Print as each account as done rather than load page all at once
+@ini_set('zlib.output_compression', 0);
+@ini_set('implicit_flush', 1);
+@ob_end_clean();
+set_time_limit(0);
+header('Content-type: text/html; charset=utf-8');
+ob_start();
+
 require('utils.php');
 
 $accounts = array();
@@ -15,9 +23,14 @@ if (!isset($_POST['accounts'])) { // if 'accounts' exists, they're testing multi
     $splitAccounts = preg_split("/\\r\\n|\\r|\\n/", $_POST['accounts']);
 
     foreach ($splitAccounts as $accountStr) {
-        error_log("str" . $accountStr);
         $accounts[] = Utils::passAccountCredentials($accountStr);
     }
+}
+
+function all_the_flushes() {
+    ob_flush();
+    flush();
+    ob_end_flush();
 }
 
 ?>
@@ -47,8 +60,8 @@ if (!isset($_POST['accounts'])) { // if 'accounts' exists, they're testing multi
 
 <?
 include('includes/header.php');
-echo "<script>document.getElementById('cpanelcheck').className = 'active';</script>";
 ?>
+<script>document.getElementById('cpanelcheck').className = 'active';</script>
 <br><br><br>
 
 <?
@@ -68,20 +81,37 @@ if (!fsockopen($host, 2083, $errno, $errstr, 10)) { // if connection to cPanel s
 ?>
 
 <div class="container">
-    <h2>Testing accounts on: <? echo $host; ?></h2>
+    <h2>Checking accounts on: <? echo $host; ?></h2>
+    <h3 id="currentacc">Testing account: 0 / <? echo count($accounts); ?></h3>
     <br>
+
+    <?php
+    // Load the header and shit
+    all_the_flushes();
+    ?>
 
     <div class="col-md-6" class="pull-left">
         <div class="row">
             <?php
+            $testingAccountNumber = 0;
+            
             foreach ($accounts as $account) {
+                 $testingAccountNumber++;
+                // This is fucking disgusting but it works so fuck it
+                echo "<script>document.getElementById('currentacc').innerHTML = 
+                        document.getElementById('currentacc').innerHTML.replace('" . ($testingAccountNumber - 1) . "', '" . ($testingAccountNumber) . "');</script>";
+                all_the_flushes(); // make sure this actually gets printed
+                
                 $response = Utils::getApiResponse($host, $account['domain'], $account['username'], $account['password']);
 
                 if ($response['login'] == "true") {
 
                     $primaryDomainMatch = $response['primary_domain_matches'];
                     $enoughFreeDiskSpace = floatval($response['diskusedpercentage']) <= 60.0 ? true : false;
-                    $warning = (!$primaryDomainMatch || !$enoughFreeDiskSpace);
+                    $diskUsed = round((intval($response['diskquotaused']) / 1024 / 1024), 2);
+                    $diskQuota = (intval($response['diskquota']) / 1024 / 1024);
+                    $possibleApiError = ($diskUsed == 0 && $diskQuota == 0); // if both of these are 0, likely an API error
+                    $warning = (!$primaryDomainMatch || !$enoughFreeDiskSpace || $possibleApiError);
 
                     echo "<div class='panel panel-" . (!$warning ? "success" : "warning") . "'>";
 
@@ -94,9 +124,9 @@ if (!fsockopen($host, 2083, $errno, $errstr, 10)) { // if connection to cPanel s
 
                     if (!$primaryDomainMatch && in_array($account['domain'], $response['addondomains']))
                         echo "<p>Domain exists as addon domain: <b>Yes</b></p>";
-                    
-                    echo("<p>Disk Usage: " . round((intval($response['diskquotaused']) / 1024 / 1024), 2) . "MB / " .
-                        (intval($response['diskquota']) / 1024 / 1024) . "MB (Disk used: " . floatval($response['diskusedpercentage']) . "%)</p>");
+
+                    echo("<p>Disk Usage: " . $diskUsed . "MB / " . $diskQuota . "MB (Disk used: " .
+                        floatval($response['diskusedpercentage']) . "%)</p>");
                     echo "</div>";
                     echo "<div class='panel-footer'>"; // open panel-footer
                     if (!$warning) {
@@ -104,6 +134,8 @@ if (!fsockopen($host, 2083, $errno, $errstr, 10)) { // if connection to cPanel s
                     } else {
                         if (!$primaryDomainMatch) echo "<p>Primary domains do not match!</p>";
                         if (!$enoughFreeDiskSpace) echo "<p>Not enough free disk space! Less than 40% available!</p>";
+                        if ($possibleApiError) echo "<p>Query returned 0MB disk usage! This can indicate that the host is 
+                            inteferring with cPanel's API, which will cause the copy tool to fail!</p>";
                     }
                     echo "</div>"; // close panel-footer
                     echo "</div>";
@@ -117,10 +149,15 @@ if (!fsockopen($host, 2083, $errno, $errstr, 10)) { // if connection to cPanel s
                     echo "</div>";
                     echo "<div class='panel-footer'>Please request correct login details</div>";
                     echo "</div>";
+
                 }
+                
+                all_the_flushes();
             }
 
             ?>
+
+            <script>document.getElementById('currentacc').innerHTML = (document.getElementById('currentacc').innerHTML + " - Complete!")</script>
 
         </div>
     </div>

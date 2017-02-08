@@ -1,4 +1,12 @@
 <?php
+// Print as each account as done rather than load page all at once
+@ini_set('zlib.output_compression', 0);
+@ini_set('implicit_flush', 1);
+@ob_end_clean();
+set_time_limit(0);
+header('Content-type: text/html; charset=utf-8');
+ob_start();
+
 require('utils.php');
 
 $accounts = array();
@@ -17,6 +25,12 @@ if (!isset($_POST['accounts'])) { // if 'accounts' exists, they're testing multi
         error_log("str" . $accountStr);
         $accounts[] = Utils::passEmailAccountCredentials($accountStr);
     }
+}
+
+function all_the_flushes() {
+    ob_flush();
+    flush();
+    ob_end_flush();
 }
 
 ?>
@@ -43,10 +57,8 @@ if (!isset($_POST['accounts'])) { // if 'accounts' exists, they're testing multi
 </head>
 <body>
 
-<?
-include('includes/header.php');
-echo "<script>document.getElementById('emailcheck').className = 'active';</script>";
-?>
+<? include('includes/header.php'); ?>
+<script>document.getElementById('emailcheck').className = 'active';</script>
 <br><br><br>
 
 <?
@@ -66,13 +78,23 @@ if (!fsockopen($host, 993, $errno, $errstr, 10)) { // if connection to email ser
 ?>
 
 <div class="container">
-    <h2>Testing email accounts on: <? echo $host; ?></h2>
+    <h2>Checking email accounts on: <? echo $host; ?></h2>
+    <h3 id="currentacc">Testing account: 0 / <? echo count($accounts); ?></h3>
     <br>
 
     <div class="col-md-6" class="pull-left">
         <div class="row">
             <?php
+            $testingAccountNumber = 0;
+            
             foreach ($accounts as $account) {
+                $testingAccountNumber++;
+
+                // This is fucking disgusting but it works so fuck it
+                echo "<script>document.getElementById('currentacc').innerHTML = 
+                        document.getElementById('currentacc').innerHTML.replace('" . ($testingAccountNumber - 1) . "', '" . ($testingAccountNumber) . "');</script>";
+                all_the_flushes(); // make sure this actually gets printed
+
                 $mailbox = imap_open("{" . $host . ":993/ssl/novalidate-cert}INBOX", $account['email'], $account['password']);
 
                 if ($mailbox) { // login successful
@@ -84,9 +106,9 @@ if (!fsockopen($host, 993, $errno, $errstr, 10)) { // if connection to email ser
                     echo "<div class='panel-body'>";
                     // Body of panel
                     echo "<p>Login: <b>Success</b></p>";
-                    echo "<p>Quota used: " . ($quota['STORAGE']['usage'] / 1024) . "</p>";
-                    echo "<p>Total quota: " . ($quota['STORAGE']['limit'] / 1024) . "</p>";
-                    echo("<p>Number of emails: " . imap_num_msg($mailbox) . "</p>");
+                    echo "<p>Quota used: " . round(($quota['STORAGE']['usage'] / 1024), 2) . "MB</p>";
+                    echo "<p>Total quota: " . ($quota['STORAGE']['limit'] / 1024) . "MB</p>";
+                    echo "<p>Number of emails in INBOX: " . imap_num_msg($mailbox) . "</p>";
                     echo "</div>";
                     echo "<div class='panel-footer'>"; // open panel-footer
                     echo "<p>Ready to migrate!</p>";
@@ -105,9 +127,13 @@ if (!fsockopen($host, 993, $errno, $errstr, 10)) { // if connection to email ser
                     echo "<div class='panel-footer'>Please request correct login details</div>";
                     echo "</div>";
                 }
+                
+                all_the_flushes();
             }
 
             ?>
+
+            <script>document.getElementById('currentacc').innerHTML = (document.getElementById('currentacc').innerHTML + " - Complete!")</script>
 
         </div>
     </div>
