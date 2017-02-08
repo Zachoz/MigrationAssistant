@@ -27,10 +27,9 @@ if (!isset($_POST['accounts'])) { // if 'accounts' exists, they're testing multi
     }
 }
 
-function all_the_flushes() {
-    ob_flush();
-    flush();
-    ob_end_flush();
+function all_the_flushes() { // both of these are needed...but ob_flush() still creates errors lol
+    @ob_flush();
+    @flush();
 }
 
 ?>
