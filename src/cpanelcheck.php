@@ -64,7 +64,7 @@
     <div class="col-md-6" class="pull-left">
         <div class="row">
             <div class="col-md-11" class="pull-left">
-                <h3>Check multiple accounts account</h3>
+                <h3>Check multiple accounts</h3>
                 <form action="cpanelsummary.php" method="post">
                     <div class="form-group">
                         <input type="text" placeholder="Server Host name or IP address" class="form-control" id="host"
