@@ -42,6 +42,12 @@ if (!isset($_POST['accounts'])) { // if 'accounts' exists, they're testing multi
     <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
     <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
+
+    <style>
+        p {
+            margin: 0 0 5px !important;
+        }
+    </style>
 </head>
 <body>
 
@@ -115,6 +121,8 @@ if (!fsockopen($host, 993, $errno, $errstr, 10)) { // if connection to email ser
                     echo "<div class='panel-footer'>Please request correct login details</div>";
                     echo "</div>";
                 }
+
+                echo "<br>";
 
                 Utils::flushBuffer();
             }
