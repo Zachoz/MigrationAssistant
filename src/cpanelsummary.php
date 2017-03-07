@@ -91,7 +91,7 @@ if (!fsockopen($host, 2083, $errno, $errstr, 10)) { // if connection to cPanel s
 
                 if ($response['login'] == "true") {
 
-                    $primaryDomainMatch = $response['primary_domain_matches'];
+                    $primaryDomainMatch = ($account['domain'] !== "") ? $response['primary_domain_matches'] : true; // Domain doesnt need to be specified
                     $enoughFreeDiskSpace = floatval($response['diskusedpercentage']) <= 60.0 ? true : false;
                     $diskUsed = round((intval($response['diskquotaused'])), 2);
                     $diskQuota = (intval($response['diskquota']));
@@ -104,7 +104,7 @@ if (!fsockopen($host, 2083, $errno, $errstr, 10)) { // if connection to cPanel s
                     echo "<div class='panel-body'>";
                     // Body of panel
                     echo "<p>Login: <b>Success</b></p>";
-                    echo "<p>Primary domains match: <b>" . ($response['primary_domain_matches'] ? "Yes" : "No") . "</b></p>";
+                    if ($account['domain'] !== "") echo "<p>Primary domains match: <b>" . ($response['primary_domain_matches'] ? "Yes" : "No") . "</b></p>";
                     echo "<p>Primary domain: " . ($response['primary_domain']) . "</p>";
 
                     if (!$primaryDomainMatch && in_array($account['domain'], $response['addondomains']))

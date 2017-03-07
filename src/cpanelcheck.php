@@ -51,8 +51,8 @@
                                name="password" required autocomplete="off">
                     </div>
                     <div class="form-group">
-                        <input type="text" placeholder="Primary domain" class="form-control" id="domain" name="domain"
-                               required autocomplete="off">
+                        <input type="text" placeholder="Primary domain (optional)" class="form-control" id="domain" name="domain"
+                                autocomplete="off">
                     </div>
                     <button type="submit" class="btn btn-default" onclick="setSingleStatus();">Check Account</button>
                 </form>
