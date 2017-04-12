@@ -98,11 +98,13 @@ if (!fsockopen($host, 2083, $errno, $errstr, 10)) { // if connection to cPanel s
                 if ($response['login'] == "true") {
 
                     $primaryDomainMatch = ($account['domain'] !== "") ? $response['primary_domain_matches'] : true; // Domain doesnt need to be specified
-                    $enoughFreeDiskSpace = floatval($response['diskusedpercentage']) <= 60.0 ? true : false;
+                    $enoughFreeDiskSpace = floatval($response['diskusedpercentage']) <= 60.0;
                     $diskUsed = round((intval($response['diskquotaused'])), 2);
                     $diskQuota = (intval($response['diskquota']));
+                    $inodesUsed = $response['inodes_used'];
                     $possibleApiError = ($diskUsed == 0 && $diskQuota == 0); // if both of these are 0, likely an API error
-                    $warning = (!$primaryDomainMatch || !$enoughFreeDiskSpace || $possibleApiError);
+                    $inodesOverLimit = $inodesUsed >= 200000;
+                    $warning = (!$primaryDomainMatch || !$enoughFreeDiskSpace || $possibleApiError || $inodesOverLimit);
 
                     echo "<div class='panel panel-" . (!$warning ? "success" : "warning") . "'>";
 
@@ -118,6 +120,7 @@ if (!fsockopen($host, 2083, $errno, $errstr, 10)) { // if connection to cPanel s
 
                     echo("<p>Disk Usage: " . $diskUsed . "MB / " . $diskQuota . "MB (Disk used: " .
                         floatval($response['diskusedpercentage']) . "%)</p>");
+                    echo("<p>Inodes used: " . $inodesUsed . "</p>");
                     echo "</div>";
                     echo "<div class='panel-footer'>"; // open panel-footer
                     if (!$warning) {
@@ -125,6 +128,7 @@ if (!fsockopen($host, 2083, $errno, $errstr, 10)) { // if connection to cPanel s
                     } else {
                         if (!$primaryDomainMatch) echo "<p>Primary domains do not match!</p>";
                         if (!$enoughFreeDiskSpace) echo "<p>Not enough free disk space! Less than 40% available!</p>";
+                        if ($inodesOverLimit) echo "<p>Account inode usage is over limit! (" . $inodesUsed . " / 200000)</p>";
                         if ($possibleApiError) echo "<p>Query returned 0MB disk usage! This can indicate that the host is 
                             inteferring with cPanel's API, which will cause the copy tool to fail!</p>";
                     }

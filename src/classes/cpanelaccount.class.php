@@ -46,7 +46,15 @@ class CpanelAccount {
         $response = json_decode($this->execApiCall("Quota", "get_quota_info"), true);
         return array(
             'quotaused' => $response['data']['megabytes_used'],
-            'quotalimit' => $response['data']['megabyte_limit']
+            'quotalimit' => $response['data']['megabyte_limit'],
+            'inodesUsed' => $response['data']['inodes_used']
+        );
+    }
+
+    public function getMailDiskUsage() {
+        $response = json_decode($this->execApiCall("Email", "fetchdiskusage"), true);
+        return array(
+                
         );
     }
 

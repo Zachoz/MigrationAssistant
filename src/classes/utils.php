@@ -16,6 +16,7 @@ class Utils {
             $diskQuotaApiResponse = $account->getDiskUsage();
             $diskQuota = $diskQuotaApiResponse['quotalimit'];
             $diskQuotaUsed = $diskQuotaApiResponse['quotaused'];
+            $inodesUsed = $diskQuotaApiResponse['inodesUsed'];
             $diskUsedPercentage = round((intval($diskQuotaUsed) / intval($diskQuota) * 100), 2);
             $addonDomains = $account->getAddonDomains();
 
@@ -26,6 +27,7 @@ class Utils {
                 'diskquota' => $diskQuota,
                 'diskquotaused' => $diskQuotaUsed,
                 'diskusedpercentage' => $diskUsedPercentage,
+                'inodes_used' => $inodesUsed,
                 'addondomains' => $addonDomains
             );
 
