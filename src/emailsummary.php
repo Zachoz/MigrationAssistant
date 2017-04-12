@@ -89,7 +89,7 @@ if (!fsockopen($host, 993, $errno, $errstr, 10)) { // if connection to email ser
                         document.getElementById('currentacc').innerHTML.replace('" . ($testingAccountNumber - 1) . "', '" . ($testingAccountNumber) . "');</script>";
                 Utils::flushBuffer(); // make sure this actually gets printed
 
-                $mailbox = imap_open("{" . $host . ":993/ssl/novalidate-cert}INBOX", $account['email'], $account['password']);
+                $mailbox = @imap_open("{" . $host . ":993/ssl/novalidate-cert}INBOX", $account['email'], $account['password']);
 
                 if ($mailbox) { // login successful
                     $quota = imap_get_quotaroot($mailbox, "INBOX");

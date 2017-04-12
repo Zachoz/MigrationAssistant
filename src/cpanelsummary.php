@@ -64,7 +64,7 @@ if ($host == null || $host == "") {
 }
 
 // Check that cPanel server is accessible
-if (!fsockopen($host, 2083, $errno, $errstr, 10)) { // if connection to cPanel server fails
+if (!@fsockopen($host, 2083, $errno, $errstr, 10)) { // if connection to cPanel server fails
     echo "<div class='container'><h2>Connection to cPanel on " . $host . ":2083 failed!</h2>";
     echo "Error: " . $errstr;
     echo "</div>";
