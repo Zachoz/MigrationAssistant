@@ -54,6 +54,7 @@
                         <input type="text" placeholder="Primary domain (optional)" class="form-control" id="domain" name="domain"
                                 autocomplete="off">
                     </div>
+                    <input title="Check Email disk usage" id="checkemail" type="checkbox" name="checkemailusage" value="Yes"> Check email disk usage *<br><br>
                     <button type="submit" class="btn btn-default" onclick="setSingleStatus();">Check Account</button>
                 </form>
                 <div><h4 id="statussingle"></h4></div>
@@ -78,6 +79,7 @@
                             </div>
                         </div>
                     </div>
+                    <input title="Check Email disk usage" id="checkemail" type="checkbox" name="checkemailusage" value="Yes"> Check email disk usage *<br><br>
                     <button type="submit" class="btn btn-default" onclick="setMutliStatus();">Check Multiple Accounts
                     </button>
                 </form>
@@ -85,6 +87,9 @@
             </div>
         </div>
     </div>
+    <br><br>
+
+    <p>* Checking email account disk usage may dramatically increase query time</p>
 
 </div>
 

@@ -52,10 +52,29 @@ class CpanelAccount {
     }
 
     public function getMailDiskUsage() {
-        $response = json_decode($this->execApiCall("Email", "fetchdiskusage"), true);
-        return array(
-                
-        );
+        $accountsListResponse = json_decode($this->execApiCall("Email", "list_pops"), true);
+        $emailAccounts = array();
+
+        foreach ($accountsListResponse['data'] as $account) {
+            $emailAccounts[] = $account['email'];
+        }
+
+        $diskUsageBytes = 0;
+
+        foreach($emailAccounts as $account) {
+            $userSplit = explode("@", $account); // index 0 is username, index 1 is domain
+
+            // Fix for cPanel default email account
+            if (!isset($userSplit[1])) $userSplit[1] = "null"; // API doesn't care what domain is supplied so long as something is thrown to it
+            
+            $emailUsageApiResponse = json_decode($this->execApiCall("Email", "get_disk_usage", ("user=" . $userSplit[0] . "&domain=" . $userSplit[1])), true);
+            error_log($this->execApiCall("Email", "get_disk_usage", ("user=" . $userSplit[0] . "&domain=" . $userSplit[1])));
+            $diskUsed = floatval($emailUsageApiResponse['data']['diskused']);
+            $diskUsageBytes += $diskUsed;
+        }
+
+        return $diskUsageBytes;
+
     }
 
     public function execApiCall($module, $function, $parametres = "") {

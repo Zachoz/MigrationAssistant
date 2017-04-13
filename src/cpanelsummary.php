@@ -21,6 +21,8 @@ if (!isset($_POST['accounts'])) { // if 'accounts' exists, they're testing multi
     }
 }
 
+$checkEmailUsage = $_POST['checkemailusage'] == "Yes";
+
 ?>
 
 <!DOCTYPE html>
@@ -93,7 +95,7 @@ if (!@fsockopen($host, 2083, $errno, $errstr, 10)) { // if connection to cPanel 
                         document.getElementById('currentacc').innerHTML.replace('" . ($testingAccountNumber - 1) . "', '" . ($testingAccountNumber) . "');</script>";
                 Utils::flushBuffer(); // make sure this actually gets printed
 
-                $response = Utils::getApiResponse($host, $account['domain'], $account['username'], $account['password']);
+                $response = Utils::getApiResponse($host, $account['domain'], $account['username'], $account['password'], $checkEmailUsage);
 
                 if ($response['login'] == "true") {
 
@@ -102,9 +104,11 @@ if (!@fsockopen($host, 2083, $errno, $errstr, 10)) { // if connection to cPanel 
                     $diskUsed = round((intval($response['diskquotaused'])), 2);
                     $diskQuota = (intval($response['diskquota']));
                     $inodesUsed = $response['inodes_used'];
+                    $emailDiskUsage = $response['email_disk_usage'];
                     $possibleApiError = ($diskUsed == 0 && $diskQuota == 0); // if both of these are 0, likely an API error
                     $inodesOverLimit = $inodesUsed >= 200000;
-                    $warning = (!$primaryDomainMatch || !$enoughFreeDiskSpace || $possibleApiError || $inodesOverLimit);
+                    $overFiveGbOfMail = $emailDiskUsage >= 4900;
+                    $warning = (!$primaryDomainMatch || !$enoughFreeDiskSpace || $possibleApiError || $inodesOverLimit || $overFiveGbOfMail);
 
                     echo "<div class='panel panel-" . (!$warning ? "success" : "warning") . "'>";
 
@@ -121,6 +125,7 @@ if (!@fsockopen($host, 2083, $errno, $errstr, 10)) { // if connection to cPanel 
                     echo("<p>Disk Usage: " . $diskUsed . "MB / " . $diskQuota . "MB (Disk used: " .
                         floatval($response['diskusedpercentage']) . "%)</p>");
                     echo("<p>Inodes used: " . $inodesUsed . "</p>");
+                    if ($checkEmailUsage) echo("<p>Email disk usage: " . $emailDiskUsage . "MB</p>");
                     echo "</div>";
                     echo "<div class='panel-footer'>"; // open panel-footer
                     if (!$warning) {
@@ -129,6 +134,7 @@ if (!@fsockopen($host, 2083, $errno, $errstr, 10)) { // if connection to cPanel 
                         if (!$primaryDomainMatch) echo "<p>Primary domains do not match!</p>";
                         if (!$enoughFreeDiskSpace) echo "<p>Not enough free disk space! Less than 40% available!</p>";
                         if ($inodesOverLimit) echo "<p>Account inode usage is over limit! (" . $inodesUsed . " / 200000)</p>";
+                        if ($overFiveGbOfMail) echo "<p>Total email usage is close to or over 5GB! (" . $emailDiskUsage . "MB)</p>";
                         if ($possibleApiError) echo "<p>Query returned 0MB disk usage! This can indicate that the host is 
                             inteferring with cPanel's API, which will cause the copy tool to fail!</p>";
                     }

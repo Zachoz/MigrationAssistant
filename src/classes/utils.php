@@ -4,7 +4,7 @@ require(__DIR__ . '/cpanelaccount.class.php');
 
 class Utils {
 
-    public static function getApiResponse($host, $domain, $username, $password) {
+    public static function getApiResponse($host, $domain, $username, $password, $checkEmailUsage) {
         $account = new CpanelAccount($host, $username, $password);
 
         if ($account->login()) {
@@ -20,6 +20,7 @@ class Utils {
             // Ensure it doesn't try dividing by zero
             $diskUsedPercentage = $diskQuota <= 0 ? 0 : round((intval($diskQuotaUsed) / intval($diskQuota) * 100), 2);
             $addonDomains = $account->getAddonDomains();
+            $emailDiskUsage = $checkEmailUsage ? $account->getMailDiskUsage() : 0;
 
             $response = array(
                 'login' => true,
@@ -31,6 +32,8 @@ class Utils {
                 'inodes_used' => $inodesUsed,
                 'addondomains' => $addonDomains
             );
+
+            if ($checkEmailUsage) $response['email_disk_usage'] = $emailDiskUsage;
 
         } else {  // Login failed
             $response = array(
