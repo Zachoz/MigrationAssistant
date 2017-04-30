@@ -68,7 +68,6 @@ class CpanelAccount {
             if (!isset($userSplit[1])) $userSplit[1] = "null"; // API doesn't care what domain is supplied so long as something is thrown to it
             
             $emailUsageApiResponse = json_decode($this->execApiCall("Email", "get_disk_usage", ("user=" . $userSplit[0] . "&domain=" . $userSplit[1])), true);
-            error_log($this->execApiCall("Email", "get_disk_usage", ("user=" . $userSplit[0] . "&domain=" . $userSplit[1])));
             $diskUsed = floatval($emailUsageApiResponse['data']['diskused']);
             $diskUsageBytes += $diskUsed;
         }
