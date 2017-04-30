@@ -32,12 +32,12 @@ class CpanelAccount {
 
     public function getAddonDomains() {
         $response = json_decode($this->execApiCall("DomainInfo", "domains_data"), true);
-        $domainsList = $response['data']['addon_domains']; // data returns another array
+        $addonDomainsList = $response['data']['addon_domains']; // data returns another array
+        $parkedDomainsList = $response['data']['parked_domains']; // data returns another array
         $domains = array();
         
-        foreach ($domainsList as $domain) {
-            $domains[] = $domain['domain'];
-        }
+        foreach ($addonDomainsList as $domain) $domains[] = $domain['domain'];
+        foreach ($parkedDomainsList as $domain) $domains[] = $domain; // I'm too tired right now to see why this doesn't need ['domain'}
 
         return $domains;
     }

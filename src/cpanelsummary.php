@@ -120,7 +120,7 @@ if (!@fsockopen($host, 2083, $errno, $errstr, 10)) { // if connection to cPanel 
                     echo "<p>Primary domain: " . ($response['primary_domain']) . "</p>";
 
                     if (!$primaryDomainMatch && in_array($account['domain'], $response['addondomains']))
-                        echo "<p>Domain (" . $account['domain'] . ") exists as addon domain: <b>Yes</b></p>";
+                        echo "<p>Domain (" . $account['domain'] . ") exists as addon/parked domain: <b>Yes</b></p>";
 
                     echo("<p>Disk Usage: " . $diskUsed . "MB / " . $diskQuota . "MB (Disk used: " .
                         floatval($response['diskusedpercentage']) . "%)</p>");
