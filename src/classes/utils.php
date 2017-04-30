@@ -30,10 +30,9 @@ class Utils {
                 'diskquotaused' => $diskQuotaUsed,
                 'diskusedpercentage' => $diskUsedPercentage,
                 'inodes_used' => $inodesUsed,
-                'addondomains' => $addonDomains
+                'addondomains' => $addonDomains,
+                'email_disk_usage' => $emailDiskUsage
             );
-
-            if ($checkEmailUsage) $response['email_disk_usage'] = $emailDiskUsage;
 
         } else {  // Login failed
             $response = array(

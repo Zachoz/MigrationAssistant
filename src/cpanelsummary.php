@@ -21,7 +21,7 @@ if (!isset($_POST['accounts'])) { // if 'accounts' exists, they're testing multi
     }
 }
 
-$checkEmailUsage = $_POST['checkemailusage'] == "Yes";
+$checkEmailUsage = isset($_POST['checkemailusage']);
 
 ?>
 
